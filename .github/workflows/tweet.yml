@@ -2,34 +2,34 @@ name: Auto Tweet
 
 on:
   schedule:
-      - cron: '0 0,3,6 * * *'  # JST 9時・12時・15時
-        workflow_dispatch:           # 手動実行も可能
+    - cron: '0 0,3,6 * * *'
+  workflow_dispatch:
 
-        jobs:
-          tweet:
-              runs-on: ubuntu-latest
-                  steps:
-                        - uses: actions/checkout@v4
+jobs:
+  tweet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-                              - uses: actions/setup-python@v5
-                                      with:
-                                                python-version: '3.11'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
-                                                      - name: Install dependencies
-                                                              run: pip install tweepy feedparser groq
+      - name: Install dependencies
+        run: pip install tweepy feedparser groq
 
-                                                                    - name: Run tweet bot
-                                                                            env:
-                                                                                      X_API_KEY: ${{ secrets.X_API_KEY }}
-                                                                                                X_API_SECRET: ${{ secrets.X_API_SECRET }}
-                                                                                                          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
-                                                                                                                    X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
-                                                                                                                              GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-                                                                                                                                      run: python tweet_bot.py
-                                                                                                                                      
-                                                                                                                                            - name: Save state
-                                                                                                                                                    uses: actions/upload-artifact@v4
-                                                                                                                                                            with:
-                                                                                                                                                                      name: state
-                                                                                                                                                                                path: state.json
-                                                                                                                                                                                          if-no-files-found: ignore
+      - name: Run tweet bot
+        env:
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: python tweet_bot.py
+
+      - name: Save state
+        uses: actions/upload-artifact@v4
+        with:
+          name: state
+          path: state.json
+          if-no-files-found: ignore
