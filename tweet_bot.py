@@ -22,6 +22,7 @@ RSS_FEEDS = [
 
 STATE_FILE = "state.json"
 MAX_TWEETS_PER_DAY = 3
+SOMA_URL = "https://www.soma-jp.net/"
 
 
 def load_state():
@@ -77,19 +78,29 @@ YES か NO だけで答えてください。"""
 
 
 def generate_tweet(title, summary, url):
-    prompt = f"""あなたは海外クラウドファンディングのプロコンサルタントです。
-日本のフォロワーに向けて、以下のプロダクトについてツイートしてください。
+    prompt = f"""あなたは海外クラウドファンディングの専門コンサルタントです。
+日本のフォロワーに向けて、以下のプロダクトについてツイートを作成してください。
 
 【キャラクター設定】
-- 海外クラファンを日々ウォッチしているプロ目線
-- 単なる紹介ではなく「なぜ这れが刺さるのか」「なぜ目標額を超えたのか」など、短い講評・分析を一言添える
-- 自然でこなれた日本語（硬い翻訳調はNG）
-- 例: 「このシンプルさが逆に刺さる」「素材へのこだわりが支持者を動かした」「日本にまだ来てないのが不思議なくらい」
+- 海外クラファンを日々ウォッチしているプロ目線のコンサルタント
+- 単なる紹介ではなく「なぜこれが刺さるのか」「なぜ目標額を超えたのか」など、鋭い講評・分析を一言添える
+- 自然でこなれた日本語（硬い翻訳調は絶対NG）
+
+【バズらせるワード・表現を積極的に使う】
+- 「これは来る」「日本上陸待望」「即完売レベル」「話題沸騰中」
+- 「目標額○%超え」「爆速で支持者が増えてる」「見逃せない」
+- 「このデザインは反則」「刺さりすぎる」「震えた」
+- 「日本未上陸なのが不思議」「正直羨ましい」
+
+【構成】
+1. 冒頭：インパクトのある一言（バズワードを使う）
+2. 中盤：プロ目線の講評・なぜ支持されているかの分析
+3. 末尾：「海外進出のご相談は→ {SOMA_URL}」を自然に添える
 
 【条件】
-- 140文字以内（URLは別途追加するので含めない）
+- 本文は100文字以内（URLは別途追加するので含めない）
 - 絵文字は必ず1つだけ（2つ以上は厳禁）
-- ハッシュタグを2〜3個（#クラファン #海外トレンド など自然なもの）
+- ハッシュタグを2〜3個（#クラファン #海外トレンド #海外進出 など）
 - ツイート本文のみ出力（説明文・前置き不要）
 
 タイトル: {title}
@@ -102,10 +113,11 @@ def generate_tweet(title, summary, url):
             max_tokens=200,
         )
         tweet_text = response.choices[0].message.content.strip()
-        full_tweet = tweet_text + "\n" + url
+        # 記事URL + SOMA URLを追記（Twitterは各URLを23文字換算）
+        full_tweet = tweet_text + "\n" + url + "\n" + SOMA_URL
         if len(full_tweet) > 280:
-            tweet_text = tweet_text[:200] + "..."
-            full_tweet = tweet_text + "\n" + url
+            tweet_text = tweet_text[:180] + "..."
+            full_tweet = tweet_text + "\n" + url + "\n" + SOMA_URL
         return full_tweet
     except Exception as e:
         print(f"Groq error: {e}")
